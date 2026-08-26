@@ -1,0 +1,44 @@
+name: Compilar APK Android
+
+on:
+  push:
+    branches: [ master ] # Cambia a "master" si tu rama principal se llama así
+
+jobs:
+  build-android:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Clonar el repositorio
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Instalar Capacitor e integrar Android
+        run: |
+          npm init -y
+          npm install @capacitor/core @capacitor/cli @capacitor/android
+          npx cap init "Reloj App" "com.ejemplo.relojapp" --web-dir .
+          npx cap add android
+          npx cap sync android
+
+      - name: Configurar Java JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Compilar ejecutable APK
+        run: |
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleDebug
+
+      - name: Adjuntar APK descargable
+        uses: actions/upload-artifact@v4
+        with:
+          name: RelojApp-Debug-APK
+          path: android/app/build/outputs/apk/debug/app-debug.apk
