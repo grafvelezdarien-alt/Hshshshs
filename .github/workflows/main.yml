@@ -1,8 +1,8 @@
-name: Compilar APK con Config XML
+name: Compilar APK
 
 on:
   push:
-    branches: [ "main", "master" ]
+    branches: [ main ]
   workflow_dispatch:
 
 jobs:
@@ -23,16 +23,13 @@ jobs:
         run: |
           npm install -g cordova
 
-      - name: Crear proyecto Android y usar config.xml
+      - name: Crear proyecto Android y compilar
         run: |
           cordova create app com.juego.pario Pario
           cd app
           rm -rf www/*
           cp -r ../* www/ 2>/dev/null || true
-          
-          # Copiar tu config.xml personalizado si existe
-          if [ -f ../config.xml ]; then cp ../config.xml config.xml; fi
-          
+          cordova plugin add cordova-plugin-local-notification
           cordova platform add android
           cordova build android --debug
 
